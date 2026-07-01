@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Stopwatch</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+body{
+
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(-45deg,#4facfe,#00f2fe,#43e97b,#38f9d7);
+background-size:400% 400%;
+animation:bg 12s ease infinite;
+
+}
+
+@keyframes bg{
+
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
+
+}
+
+.container{
+
+width:380px;
+background:rgba(255,255,255,.15);
+backdrop-filter:blur(15px);
+border-radius:20px;
+padding:30px;
+box-shadow:0 15px 40px rgba(0,0,0,.25);
+text-align:center;
+color:white;
+
+}
+
+h1{
+
+margin-bottom:20px;
+font-size:32px;
+letter-spacing:1px;
+
+}
+
+.time{
+
+font-size:52px;
+font-weight:bold;
+margin:20px 0;
+letter-spacing:2px;
+text-shadow:0 0 15px cyan;
+
+}
+
+.buttons{
+
+display:flex;
+justify-content:center;
+gap:12px;
+flex-wrap:wrap;
+
+}
+
+button{
+
+padding:12px 22px;
+border:none;
+border-radius:30px;
+cursor:pointer;
+font-size:16px;
+font-weight:bold;
+transition:.3s;
+
+}
+
+button:hover{
+
+transform:translateY(-3px);
+box-shadow:0 8px 15px rgba(0,0,0,.3);
+
+}
+
+.start{
+
+background:#00e676;
+color:white;
+
+}
+
+.pause{
+
+background:#ff9800;
+color:white;
+
+}
+
+.reset{
+
+background:#f44336;
+color:white;
+
+}
+
+.lap{
+
+background:#2196f3;
+color:white;
+
+}
+
+.laps{
+
+margin-top:25px;
+max-height:220px;
+overflow-y:auto;
+text-align:left;
+padding-right:5px;
+
+}
+
+.laps::-webkit-scrollbar{
+
+width:6px;
+
+}
+
+.laps::-webkit-scrollbar-thumb{
+
+background:white;
+border-radius:10px;
+
+}
+
+.lapItem{
+
+display:flex;
+justify-content:space-between;
+background:rgba(255,255,255,.12);
+padding:10px;
+margin-bottom:10px;
+border-radius:10px;
+animation:fade .3s;
+
+}
+
+@keyframes fade{
+
+from{
+
+opacity:0;
+transform:translateY(-10px);
+
+}
+
+to{
+
+opacity:1;
+transform:translateY(0);
+
+}
+
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h1>⏱ Stopwatch</h1>
+
+<div class="time" id="display">
+00:00:00.000
+</div>
+
+<div class="buttons">
+
+<button class="start" id="startBtn">Start</button>
+
+<button class="pause" id="pauseBtn">Pause</button>
+
+<button class="lap" id="lapBtn">Lap</button>
+
+<button class="reset" id="resetBtn">Reset</button>
+
+</div>
+
+<div class="laps" id="laps"></div>
+
+</div>
+
+<script>
+
+let startTime=0;
+let elapsedTime=0;
+let timerInterval;
+let running=false;
+
+const display=document.getElementById("display");
+const laps=document.getElementById("laps");
+
+function updateDisplay(){
+
+const current=elapsedTime+(performance.now()-startTime);
+
+let milliseconds=Math.floor(current%1000);
+
+let seconds=Math.floor(current/1000)%60;
+
+let minutes=Math.floor(current/(1000*60))%60;
+
+let hours=Math.floor(current/(1000*60*60));
+
+display.innerHTML=
+
+String(hours).padStart(2,"0")+":"+
+
+String(minutes).padStart(2,"0")+":"+
+
+String(seconds).padStart(2,"0")+"."+
+
+String(milliseconds).padStart(3,"0");
+
+}
+
+document.getElementById("startBtn").onclick=function(){
+
+if(!running){
+
+running=true;
+
+startTime=performance.now();
+
+timerInterval=requestAnimationFrame(run);
+
+this.innerHTML="Running";
+
+}
+
+}
+
+function run(){
+
+updateDisplay();
+
+if(running){
+
+timerInterval=requestAnimationFrame(run);
+
+}
+
+}
+
+document.getElementById("pauseBtn").onclick=function(){
+
+if(running){
+
+running=false;
+
+elapsedTime+=performance.now()-startTime;
+
+cancelAnimationFrame(timerInterval);
+
+document.getElementById("startBtn").innerHTML="Resume";
+
+}
+
+}
+
+document.getElementById("resetBtn").onclick=function(){
+
+running=false;
+
+cancelAnimationFrame(timerInterval);
+
+startTime=0;
+
+elapsedTime=0;
+
+display.innerHTML="00:00:00.000";
+
+laps.innerHTML="";
+
+document.getElementById("startBtn").innerHTML="Start";
+
+}
+
+document.getElementById("lapBtn").onclick=function(){
+
+if(!running) return;
+
+const lap=document.createElement("div");
+
+lap.className="lapItem";
+
+lap.innerHTML=
+
+"<span>Lap "+(laps.children.length+1)+"</span><span>"+display.innerHTML+"</span>";
+
+laps.prepend(lap);
+
+}
+
+</script>
+
+</body>
+</html>
